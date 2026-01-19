@@ -7,21 +7,57 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); min-height: 100vh; }
-        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
-        .status-btn-active { ring: 4px; ring-color: #22c55e; transform: scale(0.98); border-color: #22c55e !important; }
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 18px; height: 18px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%); 
+            min-height: 100vh; 
+        }
+
+        /* Kad Kaca (Glassmorphism) */
+        .glass-card { 
+            background: rgba(255, 255, 255, 0.95); 
+            backdrop-filter: blur(10px); 
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+        }
+
+        /* Gaya butang aktif */
+        .status-btn-active { 
+            ring: 4px; 
+            ring-color: #22c55e; 
+            transform: scale(0.98); 
+            border-color: #22c55e !important; 
+        }
+
+        /* Animasi pusingan loading */
+        .loader { 
+            border: 3px solid #f3f3f3; 
+            border-top: 3px solid #3498db; 
+            border-radius: 50%; 
+            width: 18px; 
+            height: 18px; 
+            animation: spin 1s linear infinite; 
+            display: inline-block; 
+            vertical-align: middle; 
+        }
+
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @media print { .no-print { display: none !important; } body { background: white; padding: 0; } }
+        
+        @media print { 
+            .no-print { display: none !important; } 
+            body { background: white; padding: 0; } 
+        }
+
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
         
+        /* Kotak Notifikasi */
         #notification-box {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
-            transition: all 0.5s ease;
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             transform: translateX(150%);
         }
         #notification-box.show {
@@ -31,17 +67,17 @@
 </head>
 <body class="p-4 md:p-8">
 
-    <!-- Custom Notification Box -->
+    <!-- Kotak Notifikasi Custom -->
     <div id="notification-box" class="glass-card px-6 py-4 rounded-2xl shadow-2xl border-l-8 flex items-center gap-3">
         <div id="notif-message" class="font-bold text-gray-800 text-sm"></div>
     </div>
 
     <div class="max-w-7xl mx-auto">
-        <!-- Header -->
+        <!-- Pengepala (Header) -->
         <header class="bg-blue-800 text-white p-8 rounded-3xl shadow-2xl mb-8 flex flex-col md:flex-row justify-between items-center gap-4 relative overflow-hidden">
             <div class="absolute top-0 right-0 w-64 h-64 bg-blue-700 rounded-full -mr-32 -mt-32 opacity-50"></div>
             <div class="relative z-10 text-center md:text-left">
-                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight uppercase">Keberadaan Pegawai</h1>
+                <h1 class="text-3xl md:text-4xl font-extrabold tracking-tight uppercase tracking-tighter">Keberadaan Pegawai</h1>
                 <p class="text-blue-200 font-medium text-lg uppercase tracking-wider">Sektor Pembelajaran • JPN Pahang</p>
             </div>
             <div class="relative z-10 bg-blue-900/50 backdrop-blur-md border border-blue-700 p-4 rounded-2xl text-center min-w-[200px]">
@@ -51,7 +87,8 @@
         </header>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <!-- INPUT PANEL -->
+            
+            <!-- PANEL INPUT (SEBELAH KIRI) -->
             <div class="lg:col-span-5 no-print space-y-6">
                 <div class="glass-card p-8 rounded-[2.5rem] shadow-xl animate-fade">
                     <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -60,6 +97,7 @@
                     </h2>
 
                     <div class="space-y-5">
+                        <!-- Pilihan Unit -->
                         <div>
                             <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Pilih Unit</label>
                             <select id="unit-select" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-yellow-100 transition-all">
@@ -74,6 +112,7 @@
                             </select>
                         </div>
 
+                        <!-- Pilihan Nama Pegawai -->
                         <div>
                             <label class="block text-xs font-bold text-gray-400 mb-2 uppercase tracking-widest">Nama Pegawai</label>
                             <select id="nama-select" class="w-full p-4 bg-yellow-50 border-2 border-yellow-200 rounded-2xl font-bold text-gray-800 outline-none focus:ring-4 focus:ring-yellow-100 transition-all">
@@ -81,11 +120,13 @@
                             </select>
                         </div>
 
+                        <!-- Butang Status -->
                         <div class="grid grid-cols-2 gap-4 pt-2">
                             <button id="btn-hadir" onclick="selectStatus('HADIR')" class="bg-blue-900 text-white p-5 rounded-3xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase">HADIR</button>
                             <button id="btn-tidak-hadir" onclick="selectStatus('TIDAK HADIR')" class="bg-purple-700 text-white p-5 rounded-3xl font-bold shadow-lg transition-all active:scale-95 text-sm uppercase">TIDAK HADIR</button>
                         </div>
 
+                        <!-- Bahagian Perincian Tidak Hadir -->
                         <div id="section-tidak-hadir" class="hidden space-y-4 animate-fade">
                             <div>
                                 <label class="block text-xs font-bold text-purple-600 mb-2 uppercase tracking-widest">Sebab Tidak Hadir</label>
@@ -100,36 +141,43 @@
                                 </select>
                             </div>
 
+                            <!-- Ruangan Lokasi -->
                             <div id="field-lokasi">
                                 <label class="block text-xs font-bold text-purple-600 mb-2 uppercase tracking-widest">Lokasi</label>
                                 <input type="text" id="lokasi-input" class="w-full p-4 bg-purple-50 border-2 border-purple-100 rounded-2xl font-medium outline-none focus:ring-4 focus:ring-purple-200 transition-all" placeholder="Contoh: Hospital / Putrajaya / KPM">
                             </div>
 
+                            <!-- Ruangan Catatan -->
                             <div>
                                 <label class="block text-xs font-bold text-purple-600 mb-2 uppercase tracking-widest">Catatan Tambahan (Opsional)</label>
-                                <textarea id="catatan" rows="2" class="w-full p-4 bg-purple-50 border-2 border-purple-100 rounded-2xl font-medium outline-none resize-none" placeholder="Nota tambahan jika ada..."></textarea>
+                                <textarea id="catatan" rows="2" class="w-full p-4 bg-purple-50 border-2 border-purple-100 rounded-2xl font-medium outline-none resize-none transition-all" placeholder="Nota tambahan jika ada..."></textarea>
                             </div>
                         </div>
 
+                        <!-- Butang Hantar -->
                         <button id="btn-submit" onclick="submitToAppScript()" class="w-full bg-green-600 text-white py-5 rounded-3xl font-extrabold text-xl shadow-xl hover:bg-green-700 transition-all flex items-center justify-center gap-3 active:scale-95">
                             <div id="btn-loader" class="loader hidden"></div>
                             <span id="btn-text">HANTAR KEHADIRAN</span>
                         </button>
 
+                        <!-- Butang Cetak & Refresh -->
                         <div class="flex gap-2">
-                            <button onclick="window.print()" class="flex-1 bg-white border-2 border-gray-100 text-gray-500 py-3 rounded-2xl font-bold text-[10px] uppercase text-center">Cetak</button>
-                            <button onclick="fetchLatestData()" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-2xl font-bold text-[10px] uppercase text-center">Segarkan Data</button>
+                            <button onclick="window.print()" class="flex-1 bg-white border-2 border-gray-100 text-gray-500 py-3 rounded-2xl font-bold text-[10px] uppercase text-center hover:bg-gray-50 transition-all">Cetak</button>
+                            <button onclick="fetchLatestData()" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-2xl font-bold text-[10px] uppercase text-center hover:bg-blue-100 transition-all">Segarkan Data</button>
                         </div>
                     </div>
                 </div>
 
+                <!-- Rumusan Unit -->
                 <div class="glass-card p-6 rounded-[2rem] shadow-lg">
                     <h3 class="text-[10px] font-black text-gray-400 mb-4 uppercase tracking-[0.2em]">Rumusan Unit (Live)</h3>
                     <div id="unit-summary" class="space-y-2 text-[11px]"></div>
                 </div>
             </div>
 
+            <!-- DASHBOARD REKOD (SEBELAH KANAN) -->
             <div class="lg:col-span-7 space-y-6">
+                <!-- Statistik Ringkas -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-white p-6 rounded-3xl shadow-sm border-b-4 border-blue-600">
                         <p class="text-[10px] font-bold text-gray-400 uppercase">Hadir</p>
@@ -145,10 +193,13 @@
                     </div>
                 </div>
 
+                <!-- Senarai Rekod Global -->
                 <div class="bg-white rounded-[2.5rem] shadow-xl overflow-hidden min-h-[500px]">
                     <div class="bg-gray-50 px-8 py-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-4">
                         <h3 class="font-extrabold text-gray-800 uppercase text-sm tracking-tight">Log Keberadaan (Global)</h3>
-                        <input type="text" id="search-input" onkeyup="renderDashboard()" placeholder="Cari nama..." class="w-full md:w-48 px-4 py-2 bg-white border rounded-xl text-xs outline-none shadow-sm">
+                        <div class="w-full md:w-48 relative">
+                            <input type="text" id="search-input" onkeyup="renderDashboard()" placeholder="Cari nama..." class="w-full px-4 py-2 bg-white border rounded-xl text-xs outline-none shadow-sm focus:ring-2 focus:ring-blue-100">
+                        </div>
                     </div>
                     <div id="display-lists" class="p-6 space-y-4 max-h-[700px] overflow-y-auto">
                         <div class="text-center py-20 text-gray-300 animate-pulse uppercase text-xs font-bold tracking-widest italic">Menyambung ke Google Sheets...</div>
@@ -159,8 +210,10 @@
     </div>
 
     <script>
+        // Pautan Backend Google Apps Script
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzF6WtriuAZJKGg8d3klrtR-MaTiymU-Ugx5sHlv2dp0xzlNa_JVREu6WAablhIyaaK/exec";
 
+        // Pangkalan Data Pegawai
         const staffDatabase = {
             "PENTADBIRAN DAN PENGURUSAN TERTINGGI": ["Encik Yusof bin Kassim", "Puan Zalina binti Abdul Latip", "Cik Nor Maziah bt Abdul Rashid", "Puan Siti Hazar bt Hussin", "Puan Zuraya binti Zakaria", "Puan Khairiah bt Samsudin"],
             "BAHASA": ["Puan Jalilah binti Salim", "Encik Mat Ganti bin Mansor", "Encik Isnaruddin bin Ali", "Puan Renee Wee Ting Nee", "Encik Yugendren a/l Perumal"],
@@ -174,6 +227,7 @@
         let sharedRecords = [];
         let selectedStatus = null;
 
+        // Jam dan Tarikh Dinamik
         function updateDateTime() {
             const now = new Date();
             document.getElementById('current-date').innerText = now.toLocaleDateString('ms-MY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }).toUpperCase();
@@ -182,6 +236,7 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
+        // Notifikasi Visual
         function showNotification(message, type = 'success') {
             const box = document.getElementById('notification-box');
             const msg = document.getElementById('notif-message');
@@ -191,6 +246,7 @@
             setTimeout(() => box.classList.remove('show'), 4000);
         }
 
+        // Kemaskini senarai nama mengikut unit
         document.getElementById('unit-select').addEventListener('change', function(e) {
             const unit = e.target.value;
             const nameSelect = document.getElementById('nama-select');
@@ -206,6 +262,7 @@
             }
         });
 
+        // Pengurusan Butang Status
         function selectStatus(status) {
             selectedStatus = status;
             document.getElementById('btn-hadir').classList.toggle('status-btn-active', status === 'HADIR');
@@ -214,16 +271,17 @@
             const sectionTidakHadir = document.getElementById('section-tidak-hadir');
             if (status === 'TIDAK HADIR') {
                 sectionTidakHadir.classList.remove('hidden');
-                toggleLocationField(); // Reset lokasi field based on default sebab
+                toggleLocationField();
             } else {
                 sectionTidakHadir.classList.add('hidden');
             }
         }
 
+        // Logik Sembunyi/Papar Lokasi
         function toggleLocationField() {
             const sebab = document.getElementById('sebab-select').value;
             const fieldLokasi = document.getElementById('field-lokasi');
-            // Jika Cuti Rehat atau Cuti Sakit, sorokkan lokasi
+            // Sembunyi jika Cuti Rehat atau Cuti Sakit
             if (sebab === 'Cuti Rehat' || sebab === 'Cuti Sakit') {
                 fieldLokasi.classList.add('hidden');
             } else {
@@ -231,6 +289,7 @@
             }
         }
 
+        // Penghantaran Data ke Google Sheets
         async function submitToAppScript() {
             const unit = document.getElementById('unit-select').value;
             const name = document.getElementById('nama-select').value;
@@ -256,7 +315,6 @@
                     return;
                 }
                 
-                // Bina ayat catatan
                 remarkData = sebab;
                 if (perlukanLokasi && lokasi) remarkData += " - " + lokasi;
                 if (catatan) remarkData += " (" + catatan + ")";
@@ -282,6 +340,7 @@
 
                 showNotification("Rekod berjaya dihantar!");
                 
+                // Pembersihan Form
                 document.getElementById('catatan').value = "";
                 document.getElementById('lokasi-input').value = "";
                 document.getElementById('sebab-select').value = "";
@@ -289,6 +348,7 @@
                 document.getElementById('nama-select').innerHTML = '<option value="">-- SILA PILIH UNIT DAHULU --</option>';
                 selectStatus(null);
                 
+                // Refresh data secara automatik selepas seketika
                 setTimeout(fetchLatestData, 1500);
             } catch (err) {
                 showNotification("Ralat sambungan pangkalan data!", "error");
@@ -298,6 +358,7 @@
             }
         }
 
+        // Pengambilan Data dari Google Sheets
         async function fetchLatestData() {
             if (!SCRIPT_URL || SCRIPT_URL.includes("GANTIKAN")) return;
             try {
@@ -310,6 +371,7 @@
             }
         }
 
+        // Paparan Dashboard
         function renderDashboard() {
             const listContainer = document.getElementById('display-lists');
             const summaryContainer = document.getElementById('unit-summary');
@@ -328,6 +390,7 @@
             document.getElementById('count-tidak-hadir').innerText = sharedRecords.filter(r => r.status === 'TIDAK HADIR').length;
             document.getElementById('count-pending').innerText = pendingStaff.length;
 
+            // Bar Kemajuan Unit
             let summaryHtml = "";
             for (let unit in staffDatabase) {
                 const totalInUnit = staffDatabase[unit].length;
@@ -342,6 +405,7 @@
             summaryContainer.innerHTML = summaryHtml;
 
             let html = "";
+            // Senarai Hadir
             if (hadirList.length > 0) {
                 html += `<p class="text-[10px] font-black text-blue-400 tracking-widest uppercase mb-3">Hadir Bertugas</p>`;
                 hadirList.forEach(r => {
@@ -349,6 +413,7 @@
                 });
             }
 
+            // Senarai Tidak Hadir
             if (tidakHadirList.length > 0) {
                 html += `<p class="text-[10px] font-black text-purple-400 tracking-widest uppercase mb-3 mt-4">Tidak Hadir / Catatan</p>`;
                 tidakHadirList.forEach(r => {
@@ -356,6 +421,7 @@
                 });
             }
 
+            // Senarai Belum Isi
             if (pendingStaff.length > 0 && searchQuery === "") {
                 html += `<p class="text-[10px] font-black text-red-400 tracking-widest uppercase mb-3 mt-4">Belum Mengisi Kehadiran</p>`;
                 pendingStaff.forEach(name => {
@@ -366,7 +432,11 @@
             listContainer.innerHTML = html || `<div class="text-center py-20 text-gray-300 italic uppercase">Tiada Rekod Dijumpai</div>`;
         }
 
-        window.onload = () => { fetchLatestData(); setInterval(fetchLatestData, 30000); };
+        // Permulaan Aplikasi
+        window.onload = () => { 
+            fetchLatestData(); 
+            setInterval(fetchLatestData, 30000); // Segarkan setiap 30 saat
+        };
     </script>
 </body>
 </html>
