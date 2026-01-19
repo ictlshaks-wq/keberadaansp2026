@@ -15,9 +15,28 @@
         @media print { .no-print { display: none !important; } body { background: white; padding: 0; } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade { animation: fadeIn 0.4s ease-out forwards; }
+        
+        /* Notification style */
+        #notification-box {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            transition: all 0.5s ease;
+            transform: translateX(150%);
+        }
+        #notification-box.show {
+            transform: translateX(0);
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
+
+    <!-- Custom Notification Box -->
+    <div id="notification-box" class="glass-card px-6 py-4 rounded-2xl shadow-2xl border-l-8 flex items-center gap-3">
+        <div id="notif-icon"></div>
+        <div id="notif-message" class="font-bold text-gray-800"></div>
+    </div>
 
     <div class="max-w-7xl mx-auto">
         <!-- Header -->
@@ -39,7 +58,7 @@
                 <div class="glass-card p-8 rounded-[2.5rem] shadow-xl animate-fade">
                     <h2 class="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
                         <span class="w-2 h-8 bg-blue-600 rounded-full"></span>
-                        Isi Kehadiran Online
+                        Rekod Kehadiran Online
                     </h2>
 
                     <div class="space-y-5">
@@ -80,8 +99,8 @@
                         </button>
 
                         <div class="flex gap-2">
-                            <button onclick="window.print()" class="flex-1 bg-white border-2 border-gray-100 text-gray-500 py-3 rounded-2xl font-bold text-[10px] uppercase">Cetak</button>
-                            <button onclick="fetchLatestData()" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-2xl font-bold text-[10px] uppercase">Segarkan Data</button>
+                            <button onclick="window.print()" class="flex-1 bg-white border-2 border-gray-100 text-gray-500 py-3 rounded-2xl font-bold text-[10px] uppercase text-center">Cetak</button>
+                            <button onclick="fetchLatestData()" class="flex-1 bg-blue-50 text-blue-600 py-3 rounded-2xl font-bold text-[10px] uppercase text-center">Segarkan Data</button>
                         </div>
                     </div>
                 </div>
@@ -123,7 +142,7 @@
     </div>
 
     <script>
-        // *** TAMPAL URL WEB APP ANDA DI SINI ***
+        // *** URL WEB APP ANDA ***
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzF6WtriuAZJKGg8d3klrtR-MaTiymU-Ugx5sHlv2dp0xzlNa_JVREu6WAablhIyaaK/exec";
 
         const staffDatabase = {
@@ -187,12 +206,28 @@
         setInterval(updateDateTime, 1000);
         updateDateTime();
 
+        function showNotification(message, type = 'success') {
+            const box = document.getElementById('notification-box');
+            const msg = document.getElementById('notif-message');
+            msg.innerText = message;
+            
+            if (type === 'success') {
+                box.style.borderLeftColor = '#22c55e';
+            } else {
+                box.style.borderLeftColor = '#ef4444';
+            }
+            
+            box.classList.add('show');
+            setTimeout(() => {
+                box.classList.remove('show');
+            }, 4000);
+        }
+
         // Kemaskini senarai nama apabila Unit dipilih
         document.getElementById('unit-select').addEventListener('change', function(e) {
             const unit = e.target.value;
             const nameSelect = document.getElementById('nama-select');
             
-            // Bersihkan senarai lama
             nameSelect.innerHTML = '<option value="">-- PILIH NAMA --</option>';
             
             if (unit && staffDatabase[unit]) {
@@ -219,8 +254,14 @@
             const name = document.getElementById('nama-select').value;
             const remark = document.getElementById('catatan').value;
 
-            if (!unit || !name || !selectedStatus) { alert("Sila lengkapkan maklumat!"); return; }
-            if (selectedStatus === 'TIDAK HADIR' && !remark.trim()) { alert("Masukkan sebab!"); return; }
+            if (!unit || !name || !selectedStatus) { 
+                showNotification("Sila lengkapkan Unit, Nama dan Status!", "error");
+                return; 
+            }
+            if (selectedStatus === 'TIDAK HADIR' && !remark.trim()) { 
+                showNotification("Sila masukkan catatan sebab tidak hadir!", "error");
+                return; 
+            }
 
             const btnText = document.getElementById('btn-text');
             const btnLoader = document.getElementById('btn-loader');
@@ -238,17 +279,18 @@
                     body: JSON.stringify(entry)
                 });
 
-                alert("Berjaya direkodkan!");
+                showNotification("Kehadiran berjaya direkodkan!");
                 document.getElementById('catatan').value = "";
                 
-                // Reset pemilihan unit dan nama
+                // Reset pemilihan
                 document.getElementById('unit-select').value = "";
                 document.getElementById('nama-select').innerHTML = '<option value="">-- SILA PILIH UNIT DAHULU --</option>';
-                
                 selectStatus(null);
-                fetchLatestData();
+                
+                // Segarkan data secara manual
+                setTimeout(fetchLatestData, 1500);
             } catch (err) {
-                alert("Ralat sambungan!");
+                showNotification("Ralat sambungan pangkalan data!", "error");
             } finally {
                 btnText.innerText = "HANTAR KEHADIRAN";
                 btnLoader.classList.add('hidden');
@@ -256,14 +298,14 @@
         }
 
         async function fetchLatestData() {
-            if (SCRIPT_URL.includes("GANTIKAN")) return;
+            if (!SCRIPT_URL || SCRIPT_URL.includes("GANTIKAN")) return;
             try {
                 const response = await fetch(SCRIPT_URL + "?action=read");
                 const data = await response.json();
                 sharedRecords = data;
                 renderDashboard();
             } catch (err) {
-                console.error("Gagal ambil data", err);
+                console.error("Gagal mengambil data terkini", err);
             }
         }
 
@@ -293,28 +335,28 @@
                 summaryHtml += `
                     <div class="mb-2">
                         <div class="flex justify-between items-center mb-1"><span class="font-bold text-gray-600 truncate mr-2 text-[10px]">${unit}</span><span class="text-gray-400 font-mono text-[9px]">${filledInUnit}/${totalInUnit}</span></div>
-                        <div class="w-full bg-gray-100 h-1 rounded-full"><div class="h-full bg-blue-500 rounded-full" style="width: ${progress}%"></div></div>
+                        <div class="w-full bg-gray-100 h-1 rounded-full overflow-hidden"><div class="h-full bg-blue-500 rounded-full transition-all duration-1000" style="width: ${progress}%"></div></div>
                     </div>`;
             }
             summaryContainer.innerHTML = summaryHtml;
 
             let html = "";
             if (hadirList.length > 0) {
-                html += `<p class="text-[10px] font-black text-blue-400 tracking-widest uppercase mb-3">Hadir</p>`;
+                html += `<p class="text-[10px] font-black text-blue-400 tracking-widest uppercase mb-3">Hadir Bertugas</p>`;
                 hadirList.forEach(r => {
                     html += `<div class="bg-blue-50 border border-blue-100 p-4 rounded-2xl flex justify-between items-center mb-2 animate-fade"><div><p class="font-bold text-gray-800 text-xs">${r.name}</p><p class="text-[9px] text-blue-500 uppercase font-bold">${r.unit}</p></div><span class="bg-blue-600 text-white text-[9px] font-bold px-2 py-1 rounded-full">${r.time}</span></div>`;
                 });
             }
 
             if (tidakHadirList.length > 0) {
-                html += `<p class="text-[10px] font-black text-purple-400 tracking-widest uppercase mb-3 mt-4">Tidak Hadir</p>`;
+                html += `<p class="text-[10px] font-black text-purple-400 tracking-widest uppercase mb-3 mt-4">Tidak Hadir / Catatan</p>`;
                 tidakHadirList.forEach(r => {
                     html += `<div class="bg-purple-50 border border-purple-100 p-4 rounded-2xl mb-2 animate-fade"><div class="flex justify-between items-start mb-2"><div><p class="font-bold text-gray-800 text-xs">${r.name}</p><p class="text-[9px] text-purple-500 uppercase font-bold">${r.unit}</p></div><span class="bg-purple-600 text-white text-[9px] font-bold px-2 py-1 rounded-full">${r.time}</span></div><div class="text-[10px] text-purple-900 bg-white/50 p-2 rounded-xl border border-purple-50 italic leading-relaxed">Sebab: ${r.remark}</div></div>`;
                 });
             }
 
             if (pendingStaff.length > 0 && searchQuery === "") {
-                html += `<p class="text-[10px] font-black text-red-400 tracking-widest uppercase mb-3 mt-4">Belum Rekod Keberadaan</p>`;
+                html += `<p class="text-[10px] font-black text-red-400 tracking-widest uppercase mb-3 mt-4">Belum Mengisi Kehadiran</p>`;
                 pendingStaff.forEach(name => {
                     let u = ""; for(let k in staffDatabase) if(staffDatabase[k].includes(name)) u = k;
                     html += `<div class="flex justify-between items-center px-4 py-2 text-gray-400 italic text-[9px] border-b border-red-50 uppercase tracking-tight"><span>${name}</span><span class="text-[8px] font-bold opacity-70">${u}</span></div>`;
@@ -323,7 +365,7 @@
             listContainer.innerHTML = html || `<div class="text-center py-20 text-gray-300 italic uppercase">Tiada Rekod Dijumpai</div>`;
         }
 
-        window.onload = () => { fetchLatestData(); setInterval(fetchLatestData, 20000); };
+        window.onload = () => { fetchLatestData(); setInterval(fetchLatestData, 30000); };
     </script>
 </body>
 </html>
